@@ -1,3 +1,19 @@
+// Error handling functions
+const tryCatchWrapper = function(originalFunction) {
+  return function() {
+      try {
+          originalFunction.apply(this, arguments);
+      } catch (error) {
+          logError(error.message);
+      }
+  }
+}
+
+function logError(message) {
+  console.error("There seems to be an error in the ContextMenu:\n" + message + "\n" +
+     "Please submit an issue to https://github.com/vaadin/vaadin-context-menu-flow/issues/new!");
+}
+
 // Not using ES6 imports in this file yet because the connector in V14 must
 // still work in Legacy bower projects. See: `contextMenuConnector-es6.js` for
 // the Polymer3 approach.
@@ -6,7 +22,7 @@ window.Vaadin.Flow.Legacy = window.Vaadin.Flow.Legacy || {};
 window.Vaadin.Flow.contextMenuConnector = {
 
   // NOTE: This is for the TARGET component, not for the <vaadin-context-menu> itself
-  init: function(target) {
+  init: tryCatchWrapper(function(target) {
     if (target.$contextMenuConnector) {
       return;
     }
@@ -25,27 +41,27 @@ window.Vaadin.Flow.contextMenuConnector = {
 
     target.$contextMenuConnector = {
 
-      openOnHandler: function(e) {
+      openOnHandler: tryCatchWrapper(function(e) {
         e.preventDefault();
         e.stopPropagation();
         this.$contextMenuConnector.openEvent = e;
         target.dispatchEvent(new CustomEvent('vaadin-context-menu-before-open'));
-      },
+      }),
 
-      updateOpenOn: function(eventType) {
+      updateOpenOn: tryCatchWrapper(function(eventType) {
         this.removeListener();
         this.openOnEventType = eventType;
 
-        customElements.whenDefined('vaadin-context-menu').then(() => {
+        customElements.whenDefined('vaadin-context-menu').then(tryCatchWrapper(() => {
           if (Gestures.gestures[eventType]) {
             Gestures.addListener(target, eventType, this.openOnHandler);
           } else {
             target.addEventListener(eventType, this.openOnHandler);
           }
-        });
-      },
+        }));
+      }),
 
-      removeListener: function() {
+      removeListener: tryCatchWrapper(function() {
         if (this.openOnEventType) {
           if (Gestures.gestures[this.openOnEventType]) {
             Gestures.removeListener(target, this.openOnEventType, this.openOnHandler);
@@ -53,21 +69,21 @@ window.Vaadin.Flow.contextMenuConnector = {
             target.removeEventListener(this.openOnEventType, this.openOnHandler);
           }
         }
-      },
+      }),
 
-      openMenu: function(contextMenu) {
+      openMenu: tryCatchWrapper(function(contextMenu) {
         contextMenu.open(this.openEvent);
-      },
+      }),
 
-      removeConnector: function() {
+      removeConnector: tryCatchWrapper(function() {
         this.removeListener();
         target.$contextMenuConnector = undefined;
-      }
+      })
 
     };
-  },
+  }),
 
-  generateItems: function(menu, appId, nodeId) {
+  generateItems: tryCatchWrapper(function(menu, appId, nodeId) {
     menu._containerNodeId = nodeId;
 
     const getContainer = function(nodeId) {
@@ -79,7 +95,7 @@ window.Vaadin.Flow.contextMenuConnector = {
       }
     };
 
-    const getChildItems = function(parent) {
+    const getChildItems = tryCatchWrapper(function(parent) {
       const container = getContainer(parent._containerNodeId);
       const items = container && Array.from(container.children).map(child => {
         const item = {component: child, checked: child._checked};
@@ -90,15 +106,15 @@ window.Vaadin.Flow.contextMenuConnector = {
         return item;
       });
       return items;
-    };
+    });
 
     const items = getChildItems(menu);
     menu.items = items;
-  },
+  }),
 
-  setChecked: function(component, checked) {
+  setChecked: tryCatchWrapper(function(component, checked) {
     if (component._item) {
       component._item.checked = checked;
     }
-  }
+  })
 }
