@@ -99,7 +99,7 @@ public class MenuItemsArrayGenerator<I extends MenuItemBase<?, I, ?>>
                 .map(MenuItemBase.class::cast);
     }
 
-    private void runBeforeClientResponse(Consumer<UI> command) {
+    private void runBeforeClientResponse(SerializableConsumer<UI> command) {
         getElement().getNode().runWhenAttached(ui -> ui
                 .beforeClientResponse(menu, context -> command.accept(ui)));
     }
