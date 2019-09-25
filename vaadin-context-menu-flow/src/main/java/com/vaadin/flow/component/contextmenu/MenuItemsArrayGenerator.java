@@ -16,7 +16,7 @@
 package com.vaadin.flow.component.contextmenu;
 
 import java.io.Serializable;
-import java.util.function.Consumer;
+import com.vaadin.flow.function.SerializableConsumer;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.component.Component;
