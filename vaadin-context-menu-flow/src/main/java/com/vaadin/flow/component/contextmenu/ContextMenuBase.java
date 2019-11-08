@@ -103,14 +103,14 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
      */
     public void setTarget(Component target) {
         if (getTarget() != null) {
-            targetBeforeOpenRegistration.remove();
-            targetAttachRegistration.remove();
-            getTarget().getElement()
-                    .callJsFunction("$contextMenuConnector.removeConnector");
             if (isTargetJsPending()) {
                 targetJsRegistration.cancelExecution();
                 targetJsRegistration = null;
             }
+            targetBeforeOpenRegistration.remove();
+            targetAttachRegistration.remove();
+            getTarget().getElement()
+                    .callJsFunction("$contextMenuConnector.removeConnector");
         }
 
         this.target = target;
